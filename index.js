@@ -1,8 +1,8 @@
 const express = require("express");
 const server = express();
-const productController = require("./controller/product"); //MVC APPROACH OF data.json
+const productController = require("./src/controller/product"); //MVC APPROACH OF data.json
 const router = express.Router();    //MVC APPROACH OF data.json
-const productRouter = require("./routes/product");      //MVC shorthand
+const productRouter = require("./src/routes/product");      //MVC shorthand
 const fs = require("fs"); //for crud using data.json
 const cors = require("cors");
 
@@ -16,10 +16,10 @@ async function main() {
 }
 server.use(cors()); 
 server.use(express.json()); //body parser
+server.use("/products", productRouter.router)
 server.listen(8080, () => console.log("server started")); //starting server
 
 // ---------------Mongoose API--------------------
-server.use("/products", productRouter.router)
 
 //--------------------MVC shorthand with router file--------------------
 // server.use("/products", productRouter.router);
