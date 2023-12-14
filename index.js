@@ -1,22 +1,47 @@
 const express = require("express");
 const server = express();
+const jwt = require("jsonwebtoken");
 const productController = require("./src/controller/product"); //MVC APPROACH OF data.json
-const router = express.Router();    //MVC APPROACH OF data.json
-const productRouter = require("./src/routes/product");      //MVC shorthand
+const router = express.Router(); //MVC APPROACH OF data.json
+const productRouter = require("./src/routes/product"); //MVC shorthand
+const authRouter = require("./src/routes/auth");
+const userRouter = require("./src/routes/user");
 const fs = require("fs"); //for crud using data.json
 const cors = require("cors");
 
-const mongoose = require("mongoose");           //importing Mongoose
-main().catch((err) => console.log("error", err));   //connecting Mongoose
+const mongoose = require("mongoose"); //importing Mongoose
+main().catch((err) => console.log("error", err)); //connecting Mongoose
 
 async function main() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/ecommerce");    //match id(27017) with db port
+  await mongoose.connect("mongodb://127.0.0.1:27017/ecommerce"); //match id(27017) with db port
   console.log("mongoose connected");
   // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
 }
-server.use(cors()); 
+
+//--middleware--
+const authMiddleware = (req, res, next) => {
+  //method of initializing middleware
+  const token = req.get("Authorization")?.split("Bearer ")[1]; //as log contains = Bearer eyJhbGciOiJ
+  try {
+    const decoded = jwt.verify(token, "shhhhh"); //log gives { email: 'vats@gmail.com', iat: 1702471866 }
+    console.log("decoded",decoded);
+    if (decoded.email) {
+      next();
+    } else {
+      res.sendStatus(401);
+    }
+  } catch (error) {
+    res.sendStatus(401);
+    console.log("error", error);
+  }
+};
+//--middleware--
+
+server.use(cors());
 server.use(express.json()); //body parser
-server.use("/products", productRouter.router)
+server.use("/products", authMiddleware, productRouter.router); //adding authMiddleware so that only verified user can login(SELECT BEARNER IN AUTHORIZATION)
+server.use("/auth", authRouter.router);
+server.use("/users", authMiddleware, userRouter.router);
 server.listen(8080, () => console.log("server started")); //starting server
 
 // ---------------Mongoose API--------------------
