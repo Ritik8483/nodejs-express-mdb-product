@@ -27,7 +27,7 @@ const authMiddleware = (req, res, next) => {
     console.log("decoded",decoded);
     if (decoded.email) {
       next();
-    } else {
+    } else { 
       res.sendStatus(401);
     }
   } catch (error) {

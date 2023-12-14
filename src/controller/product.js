@@ -15,11 +15,32 @@ exports.createProducts = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
+    // const productsResp = Product.find();
+    // let pageSize = 4;
+    // let pageNumber = 1;
+    // if (req.query) {
+    //   console.log(req.query);
+    //   const allProducts = await productsResp
+    //     .sort({ price: +req.query.sort }) //+req.query.sort as it's string
+    //     .skip(pageSize * (pageNumber - 1))
+    //     .limit(req.query.limit) //pagination
+    //     // .limit(req.query.limit)
+    //     .exec();
+    //   res.status(201).json(allProducts);
+    // } else {
+    //   const allProducts = await productsResp.exec(); //descending order
+    //   res.status(201).json(allProducts);
+    // }
+
+    // const productsResp = Product.find();
+    // const allProducts = await productsResp.sort({ price: -1 }).limit(1).exec(); //descending order
+    // res.status(201).json(allProducts);
+
     const productsResp = await Product.find();
     res.status(201).json(productsResp);
   } catch (error) {
     res.status(400).json(error);
-    console.log("error");
+    console.log("error", error);
   }
 };
 
