@@ -1,5 +1,19 @@
 const express = require("express");
 const server = express();
+require("./src/events"); //requiring it because itsn't related to index.js file
+const appServerSocket = require("http").createServer(server);
+const io = require("socket.io")(appServerSocket, {
+  cors: { origin: "http://localhost:3000" },
+});
+
+io.on("connection", (socket) => {
+  console.log("socket", socket.id);
+  socket.on("msg", (data) => {
+    console.log("data", data);
+  });
+  socket.emit("serverMsg", { server: "hi" });
+}); //socket conection
+
 const jwt = require("jsonwebtoken");
 const productController = require("./src/controller/product"); //MVC APPROACH OF data.json
 const router = express.Router(); //MVC APPROACH OF data.json
@@ -24,10 +38,10 @@ const authMiddleware = (req, res, next) => {
   const token = req.get("Authorization")?.split("Bearer ")[1]; //as log contains = Bearer eyJhbGciOiJ
   try {
     const decoded = jwt.verify(token, "shhhhh"); //log gives { email: 'vats@gmail.com', iat: 1702471866 }
-    console.log("decoded",decoded);
+    console.log("decoded", decoded);
     if (decoded.email) {
       next();
-    } else { 
+    } else {
       res.sendStatus(401);
     }
   } catch (error) {
@@ -35,6 +49,7 @@ const authMiddleware = (req, res, next) => {
     console.log("error", error);
   }
 };
+
 //--middleware--
 
 server.use(cors());
@@ -42,7 +57,8 @@ server.use(express.json()); //body parser
 server.use("/products", authMiddleware, productRouter.router); //adding authMiddleware so that only verified user can login(SELECT BEARNER IN AUTHORIZATION)
 server.use("/auth", authRouter.router);
 server.use("/users", authMiddleware, userRouter.router);
-server.listen(8080, () => console.log("server started")); //starting server
+// server.listen(8080, () => console.log("server started")); //starting server
+appServerSocket.listen(8080, () => console.log("server started")); //socket server
 
 // ---------------Mongoose API--------------------
 

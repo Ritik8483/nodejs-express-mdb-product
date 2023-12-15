@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   firstName: String,
   lastName: String,
+  cart: [{ type: Schema.Types.ObjectId, ref: "Product" }],    //this objectID will be product id,add cart:["product_id"] in db
   email: { type: String, unique: true },
   password: String,
   token: String,
