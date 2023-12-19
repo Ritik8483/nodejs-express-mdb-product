@@ -6,13 +6,25 @@ const io = require("socket.io")(appServerSocket, {
   cors: { origin: "http://localhost:3000" },
 });
 
+// io.on("connection", (socket) => {
+//   console.log("socket", socket.id);
+//   socket.on("msg", (data) => {
+//     console.log("data", data);
+//   });
+//   socket.emit("serverMsg", { server: "hi" });
+// }); //socket conection
+
+// SOCKET_CHAT
 io.on("connection", (socket) => {
-  console.log("socket", socket.id);
-  socket.on("msg", (data) => {
-    console.log("data", data);
+  socket.on("join_room", (data) => {
+    //recieving rooms id and joining them
+    socket.join(data);
   });
-  socket.emit("serverMsg", { server: "hi" });
-}); //socket conection
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("recieve_message", data); //sending message to the same room to client
+  });
+});
+
 
 const jwt = require("jsonwebtoken");
 const productController = require("./src/controller/product"); //MVC APPROACH OF data.json

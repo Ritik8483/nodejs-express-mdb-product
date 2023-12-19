@@ -18,8 +18,8 @@ const User = model.User;
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const userResp = await User.find().populate("cart"); //it will all data related to product id
-    // const userResp = await User.find();
+    // const userResp = await User.find().populate("cart"); //it will all data related to product id
+    const userResp = await User.find();
     res.status(201).json(userResp);
   } catch (error) {
     res.status(400).json(error);
