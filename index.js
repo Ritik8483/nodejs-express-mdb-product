@@ -6,25 +6,55 @@ const io = require("socket.io")(appServerSocket, {
   cors: { origin: "http://localhost:3000" },
 });
 
-// io.on("connection", (socket) => {
-//   console.log("socket", socket.id);
-//   socket.on("msg", (data) => {
-//     console.log("data", data);
-//   });
-//   socket.emit("serverMsg", { server: "hi" });
-// }); //socket conection
-
-// SOCKET_CHAT
+//SOCKET USED IN CHAT IMPLEMENTATION
 io.on("connection", (socket) => {
+  //Custom Room
   socket.on("join_room", (data) => {
-    //recieving rooms id and joining them
-    socket.join(data);
+    console.log("join_room", data); //here we recieve data on backend and connect users with the same room name
+    socket.join(data?.roomName);
   });
-  socket.on("send_message", (data) => {
-    socket.to(data.room).emit("recieve_message", data); //sending message to the same room to client
-  });
-});
 
+  //when message is hit then it will show that message only to joined rooms users
+  socket.on("message", (data) => {
+    io.to(data.roomName).emit("message", data); //to chat with particular men ; room can be an array
+  });
+
+  socket.on("disconnect", () => {
+    console.log("USER DISCONNECTED", socket.id);
+  });
+}); //socket conection
+
+//TEST LEARNING THINGS
+// io.on("connection", (socket) => {
+//   // console.log("socket", socket);
+//   // socket.on("send-message", (data) => {
+//   //   //used to recive data on server
+//   //   console.log("data", data);
+//   // });
+
+//   // socket.on("message", (data) => {
+//   //   console.log(data);        //here we recieve data on backend
+//   //   io.emit("message", data);     //it will emit that data to all the users
+//   //   // socket.broadcast.emit("message", data);     //it will emit that data to all the users
+//   // });
+
+//   socket.on("message", (data) => {      //to chat with particular men
+//     console.log(data);        //here we recieve data on backend
+//     io.to(data.roomsId).emit("message", data.message);     //room can be an array
+//     // socket.broadcast.emit("message", data);     //it will emit that data to all the users
+//   });
+
+// socket.on("join-room", (data) => {      //Custom Room
+//   console.log(data);        //here we recieve data on backend
+//   socket.join(data)
+// });
+
+//   // socket.emit("welcome", `Welcome to the server ${socket.id}`); //Message will go to all socket like to localhost on frontend they recieve same messages
+//   // socket.broadcast.emit("welcome", `Welcome to the server ${socket.id}`); //Message will not go to the socket like first localhost and will be visible on 2nd localhost; we will brodasted socket id of first localhost on 2nd localhost etc
+  // socket.on("disconnect", () => {
+  //   console.log("USER DISCONNECTED", socket.id);
+  // });
+// });
 
 const jwt = require("jsonwebtoken");
 const productController = require("./src/controller/product"); //MVC APPROACH OF data.json
@@ -32,6 +62,7 @@ const router = express.Router(); //MVC APPROACH OF data.json
 const productRouter = require("./src/routes/product"); //MVC shorthand
 const authRouter = require("./src/routes/auth");
 const userRouter = require("./src/routes/user");
+const roomRouter = require("./src/routes/room");
 const fs = require("fs"); //for crud using data.json
 const cors = require("cors");
 
@@ -69,6 +100,7 @@ server.use(express.json()); //body parser
 server.use("/products", authMiddleware, productRouter.router); //adding authMiddleware so that only verified user can login(SELECT BEARNER IN AUTHORIZATION)
 server.use("/auth", authRouter.router);
 server.use("/users", authMiddleware, userRouter.router);
+server.use("/room", roomRouter.router);
 // server.listen(8080, () => console.log("server started")); //starting server
 appServerSocket.listen(8080, () => console.log("server started")); //socket server
 
